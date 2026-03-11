@@ -19,6 +19,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
+	//Load shaders
+	m_TriangleShader = CompileShaders("./Shaders/triangle.vs", "./Shaders/triangle.fs");
 	
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -46,6 +48,17 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBORect);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+
+	float triangle[]
+		=
+	{
+		0,0,0,//v0
+		1,0,0,//v1
+		1,1,0,//v2
+	};
+	glGenBuffers(1, &m_TriangleVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(triangle),triangle,GL_STATIC_DRAW);//데이터 올리는건 대부분 동기화가 되야됨 보통은 동기
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -158,28 +171,20 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	return ShaderProgram;
 }
 
-void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
+void Renderer::DrawTriangle()
 {
-	float newX, newY;
 
-	GetGLPosition(x, y, &newX, &newY);
 
 	//Program select
-	glUseProgram(m_SolidRectShader);
+	glUseProgram(m_TriangleShader);
 
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), newX, newY, 0, size);
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), r, g, b, a);
-
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glDisableVertexAttribArray(attribPosition);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
