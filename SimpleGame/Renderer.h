@@ -34,5 +34,8 @@ private:
 
 	GLuint m_TriangleVBO = 0;
 	GLuint m_TriangleShader=0;
+
+	GLuint m_VelVBO = 0; // 랜덤 속도를 담을 새 바구니 번호표
+	int m_ParticleCount = 100;
 };
 

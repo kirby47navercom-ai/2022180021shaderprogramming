@@ -51,23 +51,52 @@ void Renderer::CreateVertexBufferObjects()
 
 	float centerX = 0;
 	float centerY = 0;
+	float vx = 1;
+	float vy = 1;
 	float size = 0.1;
-
+	float mass = 1;
 	float triangle[]
 		=
 	{
-		centerX - size/2,centerY - size / 2,0,//v0
-		centerX + size / 2,centerY - size / 2,0,//v1
-		centerX + size / 2,centerY + size / 2,0,//v2
+		centerX - size/2,centerY - size / 2,0,
+		mass,vx,vy,//v0
+		centerX + size / 2,centerY - size / 2,0,
+		mass,vx,vy,//v1
+		centerX + size / 2,centerY + size / 2,0,
+		mass,vx,vy,//v2
 
 		centerX - size / 2,centerY - size / 2,0,
+		mass,vx,vy,
 		centerX + size / 2,centerY + size / 2,0,
-		centerX - size / 2,centerY + size / 2,0
+		mass,vx,vy,
+		centerX - size / 2,centerY + size / 2,0,
+		mass,vx,vy
 	};
 	glGenBuffers(1, &m_TriangleVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(triangle),triangle,GL_STATIC_DRAW);//데이터 올리는건 대부분 동기화가 되야됨 보통은 동기
 }
+//void Renderer::CreateVertexBufferObjects() {
+//	// 1. 네모 모양 데이터 (기존과 동일)
+//	float rect[] = {
+//		-0.05f, -0.05f, 0.0f,  0.05f, -0.05f, 0.0f,  0.05f,  0.05f, 0.0f,
+//		-0.05f, -0.05f, 0.0f,  0.05f,  0.05f, 0.0f, -0.05f,  0.05f, 0.0f
+//	};
+//	glGenBuffers(1, &m_VBORect);
+//	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW); 
+//
+//		// 2. 100개의 랜덤 속도 데이터 만들기
+//		float velocities[100 * 2]; // 100명분의 (x속도, y속도)
+//	for (int i = 0; i < 100; i++) {
+//		velocities[i * 2] = ((rand() % 200) - 100) / 100.0f; // X속도: -1.0 ~ 1.0 랜덤
+//		velocities[i * 2 + 1] = (rand() % 100) / 50.0f;       // Y속도: 0.0 ~ 2.0 랜덤
+//	}
+//
+//	glGenBuffers(1, &m_VelVBO);
+//	glBindBuffer(GL_ARRAY_BUFFER, m_VelVBO);
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(velocities), velocities, GL_STATIC_DRAW);
+//}
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
@@ -182,7 +211,7 @@ float gTime = 0;
 void Renderer::DrawTriangle()
 {
 
-	gTime += 0.002f;
+	gTime += 0.01f;
 	//Program select
 	glUseProgram(m_TriangleShader);
 
@@ -191,13 +220,53 @@ void Renderer::DrawTriangle()
 	glUniform1f(uTime, gTime);
 
 	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Position");
+	int attribMass = glGetAttribLocation(m_TriangleShader, "a_Mass");
+	int attribVel = glGetAttribLocation(m_TriangleShader, "a_Vel");
+
 	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribMass);
+	glEnableVertexAttribArray(attribVel);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);//뒤에 두자리중 왼쪽것은 스트라이드임
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glVertexAttribPointer(attribMass, 1, GL_FLOAT, GL_FALSE, 6*sizeof(float), (GLvoid*)(sizeof(float)*3));//뒤에 두자리중 왼쪽것은 스트라이드임
+	//4개씩 넘어가야 새로운게 나오므로 4*sizeof(float)를함
+	//두번째는 몇개씩 읽을지
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glVertexAttribPointer(attribVel, 2, GL_FLOAT, GL_FALSE,6 * sizeof(float), (GLvoid*)(sizeof(float) * 4));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 }
+//void Renderer::DrawTriangle() {
+//	gTime += 0.01f;
+//	//Program select
+//	glUseProgram(m_TriangleShader);// 2. 랜덤 속도 연결 (a_Vel)
+//	int uTime = glGetUniformLocation(m_TriangleShader,"u_Time");
+//	glUniform1f(uTime, gTime);
+//
+//	
+//
+//		// 1. 모양 연결 (a_Position)
+//		int posLoc = glGetAttribLocation(m_TriangleShader, "a_Position");
+//	glEnableVertexAttribArray(posLoc);
+//	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+//	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//	// 2. 랜덤 속도 연결 (a_Vel)
+//	int velLoc = glGetAttribLocation(m_TriangleShader, "a_Vel");
+//	glEnableVertexAttribArray(velLoc);
+//	glBindBuffer(GL_ARRAY_BUFFER, m_VelVBO);
+//	glVertexAttribPointer(velLoc, 2, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//	// 이 함수가 핵심! "속도 데이터는 네모 1개(인스턴스)마다 다음 칸으로 넘어가라"는 뜻입니다.
+//	glVertexAttribDivisor(velLoc, 1);
+//
+//	// 3. 100개 그리기 명령
+//	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
+//}
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
 {

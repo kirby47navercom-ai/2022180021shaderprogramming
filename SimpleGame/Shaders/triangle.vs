@@ -3,6 +3,12 @@
 //sin(t * 3.141592 * 2.0) 라디안 * 파이/2
 //gl_Position GL 내부에서 정한 출력 변수
 in vec3 a_Position;
+in float a_Mass;
+in vec2 a_Vel;
+
+const float c_PI = 3.141592;
+const vec2 c_G = vec2(0,-9.8);
+
 uniform vec4 u_Trans;
 uniform float u_Time;
 
@@ -78,7 +84,58 @@ void Sin5()
     gl_Position = newPosition;
 	
 }
+
+//시험에 나올 수 도 잇음
+void Falling(){
+	float t =mod(u_Time,1.0);
+	float tt = t*t;
+	float vx = a_Vel.x;
+	float vy = a_Vel.y;
+	float initPosX=a_Position.x+cos(vx*c_PI*2);
+	float initPosY=a_Position.y+sin(vy*c_PI*2);
+	vec4 newPos;
+	newPos.x=initPosX;
+	newPos.y=initPosY+ vy*t+ tt*c_G.y*0.5;
+	newPos.z=0;
+	newPos.w=1;
+	gl_Position = newPos;
+
+}
+void Falling2(){
+float t =mod(u_Time,1.0);
+	float tt = t*t;
+	float vx = a_Vel.x;
+	float vy = a_Vel.y;
+	vec4 newPos;
+	newPos.x=a_Position.x+ vx*t+ tt*c_G.x*0.5;
+	newPos.y=a_Position.y+ vy*t+ tt*c_G.y*0.5;
+	newPos.z=0;
+	newPos.w=1;
+	gl_Position = newPos;
+
+}
+
+//시험 만약 initPosX initPosY를 주고 원 주위로 내려오라고 할때
+void gravity(){
+	// 각 네모마다 속도가 다르므로, 바닥에 닿는 시간도 다르게 보이게 합니다.
+    // mod를 사용해 0~2초 사이를 무한 반복하게 설정
+    float t = mod(u_Time + a_Vel.x * 10.0, 2.0); 
+	float vx = a_Vel.x;
+	float vy = a_Vel.y;
+    float initPosX=a_Position.x+cos(vx*c_PI*2);
+	float initPosY=a_Position.y+sin(vx*c_PI*2);
+    vec4 newPos;
+    // X축: 처음 위치 + 속도 * 시간
+    newPos.x =initPosX;
+    // Y축: 처음 위치 + 속도 * 시간 + (1/2 * 중력 * 시간^2)
+    newPos.y = initPosY + a_Vel.y * t + 0.5 * c_G.y * t * t;
+    newPos.z = 0.0;
+    newPos.w = 1.0;
+
+    gl_Position = newPos;
+}
+
 void main(){
-	Sin5();
+	gravity();
 
 }
