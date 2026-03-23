@@ -4,13 +4,14 @@
 //gl_Position GL 내부에서 정한 출력 변수
 in vec3 a_Position;
 in float a_Mass;
-in vec2 a_Vel;
+in vec3 a_Vel;
 
 const float c_PI = 3.141592;
 const vec2 c_G = vec2(0,-9.8);
 
 uniform vec4 u_Trans;
 uniform float u_Time;
+
 
 void Basic()
 {
@@ -134,8 +135,97 @@ void gravity(){
 
     gl_Position = newPos;
 }
+void Falling3(){
+	float newTime = u_Time-a_Vel.x;
+	
+	if(newTime>0){
+	float t = mod(newTime , 2.0); 
+	float vx = a_Vel.x;
+	float vy = a_Vel.y;
+    float initPosX=a_Position.x+cos(vx*c_PI*2);
+	float initPosY=a_Position.y+sin(vx*c_PI*2);
+    vec4 newPos;
+    // X축: 처음 위치 + 속도 * 시간
+    newPos.x =initPosX;
+    // Y축: 처음 위치 + 속도 * 시간 + (1/2 * 중력 * 시간^2)
+    newPos.y = initPosY + a_Vel.y * t + 0.5 * c_G.y * t * t;
+    newPos.z = 0.0;
+    newPos.w = 1.0;
+	gl_Position = newPos;
+	}
+	else{
+	gl_Position=vec4(-100,-100,0,1);
+	}
 
+    
+}
+
+float pseudoRandom(float n){
+	return fract(sin(n)*43758.5453123);
+}
+void Falling4(){
+	float newTime = u_Time-a_Vel.z;
+	float scale = a_Vel.z;
+	if(newTime>0){
+	float t = mod(newTime , 1.0); 
+	float vx = a_Vel.x;
+	float vy = a_Vel.y;
+    float initPosX=a_Position.x*a_Vel.z+cos(vx*c_PI*2);
+	float initPosY=a_Position.y*a_Vel.z+sin(vx*c_PI*2);
+    vec4 newPos;
+    // X축: 처음 위치 + 속도 * 시간
+    newPos.x =initPosX;
+    // Y축: 처음 위치 + 속도 * 시간 + (1/2 * 중력 * 시간^2)
+    newPos.y = initPosY + 0.5 * c_G.y * t * t;
+    newPos.z = 0.0;
+    newPos.w = 1.0;
+	gl_Position = newPos;
+	}
+	else{
+	gl_Position=vec4(-100,-100,0,1);
+	}
+
+    
+}
+void GalaxySupernova() {
+    // 1. 우주의 시간 (빅뱅과 블랙홀 흡수를 반복하는 주기)
+    // 0~2.0 사이를 반복하며, 폭발과 수축의 기준이 됩니다.
+    float t = mod(u_Time * 0.3, 2.0); 
+
+    // 2. 파티클 고유의 위치 세팅 (a_Vel을 활용한 랜덤 분포)
+    // a_Vel.x (-1.0 ~ 1.0)를 이용해 360도(4파이) 무작위 각도 배정
+    float angle = a_Vel.x * c_PI * 4.0; 
+    
+    // a_Vel.z (0.0 ~ 1.0)를 이용해 중심으로부터의 무작위 거리 배정
+    float radius = a_Vel.z * 1.8;       
+
+    // 3. 소용돌이 마법 (안쪽에 있는 별일수록 더 빨리 돕니다!)
+    // 거리가 가까울수록 회전 속도가 기하급수적으로 빨라집니다.
+    float swirl = angle + u_Time * (2.0 / (radius + 0.2));
+
+    // 4. 빅뱅과 블랙홀 마법 (sin 함수로 부드러운 팽창과 수축)
+    // t가 1.0일 때 가장 크게 팽창하고, 0.0이나 2.0일 때 한 점으로 모입니다.
+    float expansion = sin(t * c_PI);
+
+    // 5. 최종 위치 계산 (원운동 공식 적용)
+    // a_Vel.y를 곱해줘서 별들마다 퍼져나가는 궤도 크기를 다르게 만듭니다.
+    float currentRadius = radius * expansion * (a_Vel.y + 0.5);
+    float posX = cos(swirl) * currentRadius;
+    float posY = sin(swirl) * currentRadius;
+
+    // 6. 네모 크기 조절 (멀리 날아갈수록, 팽창할수록 크기가 커집니다)
+    float scale = a_Vel.z * expansion * 0.8;
+
+    vec4 newPos;
+    // a_Position에 스케일을 곱해 네모 크기를 정하고, 소용돌이 위치를 더합니다.
+    newPos.x = (a_Position.x * scale) + posX;
+    newPos.y = (a_Position.y * scale) + posY;
+    newPos.z = 0.0;
+    newPos.w = 1.0;
+
+    gl_Position = newPos;
+}
 void main(){
-	gravity();
+	GalaxySupernova();
 
 }

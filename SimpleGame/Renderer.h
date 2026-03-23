@@ -4,8 +4,11 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-
+#include <random>
+using namespace std;
 #include "Dependencies\glew.h"
+
+
 
 class Renderer
 {
@@ -36,6 +39,7 @@ private:
 	GLuint m_TriangleShader=0;
 
 	GLuint m_VelVBO = 0; // 랜덤 속도를 담을 새 바구니 번호표
+	GLuint m_RanVBO = 0; // 랜덤 속도를 담을 새 바구니 번호표
 	int m_ParticleCount = 100;
 };
 
