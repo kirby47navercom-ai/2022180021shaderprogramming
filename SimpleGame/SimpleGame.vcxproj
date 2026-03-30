@@ -177,6 +177,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\1triangle.vs" />
+    <None Include="Shaders\FSRect.fs" />
+    <None Include="Shaders\FSRect.vs" />
     <None Include="Shaders\SolidRect.fs" />
     <None Include="Shaders\SolidRect.vs" />
     <None Include="Shaders\triangle.fs" />

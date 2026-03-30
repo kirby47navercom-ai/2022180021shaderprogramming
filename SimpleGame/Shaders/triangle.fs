@@ -1,6 +1,6 @@
 #version 330
 
-layout(location=0) out vec4 FragColor;
+out vec4 FragColor;
 
 in float v_Grey;
 

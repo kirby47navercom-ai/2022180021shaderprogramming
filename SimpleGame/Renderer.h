@@ -16,7 +16,7 @@ public:
 	bool IsInitialized();
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTriangle();
-
+	void DrawFS();
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(char* filename, std::string* target);
@@ -29,6 +29,9 @@ private:
 
 	unsigned int m_WindowSizeX = 0;
 	unsigned int m_WindowSizeY = 0;
+
+	GLuint m_VBOFS = 0;
+	GLuint FS_Shader = 0;
 
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;

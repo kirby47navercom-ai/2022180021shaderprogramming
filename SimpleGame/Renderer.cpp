@@ -24,6 +24,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_TriangleShader = CompileShaders("./Shaders/triangle.vs", "./Shaders/triangle.fs");
+	FS_Shader = CompileShaders("./Shaders/FSRect.vs", "./Shaders/FSRect.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -41,9 +42,24 @@ bool Renderer::IsInitialized()
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float rect[]
-		=
-	{
+
+	float Frect[]{//x,y,z,u,v
+		-1,-1,0,0,1,
+		1,1,0,1,0,
+		-1,1,0,0,0, // 1 삼각형
+
+		-1,-1,0,0,1,
+		1,-1,0,1,1,
+		1,1,0,1,0 //2 삼각형
+
+	};
+	glGenBuffers(1, &m_VBOFS);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Frect), Frect, GL_STATIC_DRAW);
+
+
+
+	float rect[]{
 		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, -1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
 		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,  1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
 	};
@@ -303,6 +319,33 @@ void Renderer::DrawTriangle()
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 }
+
+void Renderer::DrawFS()
+{
+	gTime += 0.01; // ���� �ӵ��� �°� ���� �ʿ�
+	int stride = 5 * sizeof(float); // vec4(4) + vec4(4) = 8
+	GLuint shader = FS_Shader;
+	glUseProgram(shader);
+	glUniform1f(glGetUniformLocation(shader, "u_Time"), gTime);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Pos");
+	int attribTexture = glGetAttribLocation(shader, "a_Tex");
+	
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexture);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)0);
+	glVertexAttribPointer(attribTexture, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(3*sizeof(float)));
+
+
+
+	// �׸���
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	
+}
+
 
 void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 {
