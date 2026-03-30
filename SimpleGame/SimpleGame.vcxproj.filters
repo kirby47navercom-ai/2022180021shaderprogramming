@@ -38,6 +38,9 @@
     <ClCompile Include="SimpleGame.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="1Renderer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -53,6 +56,9 @@
       <Filter>헤더 파일</Filter>
     </None>
     <None Include="Shaders\triangle.vs">
+      <Filter>헤더 파일</Filter>
+    </None>
+    <None Include="Shaders\1triangle.vs">
       <Filter>헤더 파일</Filter>
     </None>
   </ItemGroup>

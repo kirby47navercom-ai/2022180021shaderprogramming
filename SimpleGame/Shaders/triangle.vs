@@ -1,231 +1,234 @@
-#version 330
-//mod(a,b) a¸¦ b·Î ³ª´« ³ª¸ÓÁö
-//sin(t * 3.141592 * 2.0) ¶óµğ¾È * ÆÄÀÌ/2
-//gl_Position GL ³»ºÎ¿¡¼­ Á¤ÇÑ Ãâ·Â º¯¼ö
-in vec3 a_Position;
-in float a_Mass;
-in vec3 a_Vel;
+ï»¿#version 330
 
-const float c_PI = 3.141592;
-const vec2 c_G = vec2(0,-9.8);
-
-uniform vec4 u_Trans;
 uniform float u_Time;
 
+//in vec3 a_Position;
+//in float a_Mass;
+//in vec2 a_Vel;
+//in float a_RV;
+//in float a_RV1;
+
+layout(location = 0) in vec4 a_PosMass; 
+layout(location = 1) in vec4 a_VelRV;
+in float a_RV2;
+
+vec3 a_Position = a_PosMass.xyz;
+float a_Mass = a_PosMass.w;
+vec2 a_Vel = a_VelRV.xy;
+float a_RV = a_VelRV.z;
+float a_RV1 = a_VelRV.w;
+
+const float c_PI = 3.141592; 
+const vec2 c_G = vec2(0, -9.8);
+
+out float v_Grey;
+
+
+void sin1() // aiï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Âµï¿½ ï¿½ï¿½ ï¿½Èµï¿½ï¿½ï¿½ ai ï¿½Ë¸ï¿½Ã»ï¿½ï¿½;;
+{
+    float movement = mod(u_Time, 2.0); 
+
+    vec4 newPosition = vec4(a_Position, 1.0);
+    newPosition.x += movement;
+
+    if (newPosition.x > 1.0) {
+        newPosition.x -= 2.0;
+    }
+
+    newPosition.y += sin(u_Time * 5.0) * 0.5;
+
+    gl_Position = newPosition;
+}
 
 void Basic()
 {
-	float t = mod(u_Time*10,1.0f); //0~1
-	vec4 newPosition;
-	newPosition.x = a_Position.x+t;
-	newPosition.y = a_Position.y + sin(t * 3.141592 * 2.0);
-	newPosition.z = a_Position.z;
-	gl_Position = newPosition;
-	
-}
-void Sin2()
-{
-	float t = mod(u_Time*10,2.0f); //0~1
-	vec4 newPosition;
-	newPosition.x = a_Position.x+t-1.f;
-	newPosition.y = a_Position.y + sin(t * 3.141592 * 1.0)*0.5f;
-	newPosition.z = a_Position.z;
-	gl_Position = newPosition;
-	
-}
-void Sin3()
-{
-	float t = mod(u_Time*10,2.0f); //0~1
-	vec4 newPosition;
-	newPosition.x = a_Position.x+t-1.f;
-	newPosition.y = a_Position.y + sin(t * 3.141592 * 2.0)*0.5f;
-	newPosition.z = a_Position.z;
-	gl_Position = newPosition;
-	
-}
-void Sin4()
-{
-	float t = mod(u_Time*10,2.0f); //0~1
-	vec4 newPosition;
-	newPosition.x = a_Position.x + cos(t * 3.141592 * 2.0)*0.5;
-	newPosition.y = a_Position.y + sin(t * 3.141592 * 2.0)*0.5;
-	newPosition.z = a_Position.z;
-	gl_Position = newPosition;
-	
-}
-void Sin5()
-{
-	// 1. ½Ã°£ Èå¸§ ¸¸µé±â (ÇÏÆ®¸¦ ±×¸®´Â ¼Óµµ)
-    float t = u_Time * 10.0;
+    float t = mod(u_Time*10, 1.0);
 
-    // 2. ÇÏÆ® ¸ğ¾çÀ» ±×¸®´Â ¸¶¹ıÀÇ ¼öÇĞ °ø½Ä! (À§Ä¡ °è»ê)
-    // XÃà: sinÀ» ¼¼ ¹ø °öÇØ¼­ ÇÏÆ®ÀÇ º¼·ÏÇÑ À­ºÎºĞ°ú »ÏÁ·ÇÑ ¾Æ·¡ÂÊÀ» ¸¸µì´Ï´Ù.
-    float x = 16.0 * sin(t) * sin(t) * sin(t);
-    
-    // YÃà: cos ¿©·¯ °³¸¦ ¼¯¾î¼­ ÇÏÆ® Æ¯À¯ÀÇ ±¼°îÀ» ¼¶¼¼ÇÏ°Ô ±ğ¾Æ³À´Ï´Ù.
-    float y = 13.0 * cos(t) - 5.0 * cos(2.0 * t) - 2.0 * cos(3.0 * t) - cos(4.0 * t);
+	vec4 newPosition;
+	newPosition = vec4(a_Position, 1);
+	newPosition += vec4(-1 + t*2, 0.5*sin(t*2*3.141592), 0, 0);
 
-    // 3. µµÈ­Áö¿¡ µé¾î°¡µµ·Ï Å©±â ÁÙÀÌ±â
-    // °ø½Ä´ë·Î ±×¸®¸é ³Ê¹« °Å´ëÇØ¼­ È­¸é ¹ÛÀ¸·Î ³ª°¡¹ö·Á¿ä. 0.04¸¦ °öÇØ¼­ ÀÛ°Ô ¸¸µì´Ï´Ù.
-    float scale = 0.04;
+	gl_Position = newPosition;
+}
 
-    // 4. µÎ±ÙµÎ±Ù ½ÉÀå ¹Úµ¿ È¿°ú ³Ö±â!
-    // ½Ã°£¿¡ µû¶ó 1.0À» ±âÁØÀ¸·Î Å©±â°¡ ¾ÆÁÖ »ìÂ¦ Ä¿Á³´Ù ÀÛ¾ÆÁ³´Ù ¹İº¹ÇÏ°Ô ÇÕ´Ï´Ù.
-    float heartbeat = 1.0 + 0.15 * sin(u_Time * 8.0);
+void circle()
+{
+    float t = mod(u_Time*10, 1.0);
 
-    // 5. ¿ø·¡ ²ÀÁşÁ¡ À§Ä¡¿¡ ÇÏÆ® ±ËÀû(x, y)°ú ¹Úµ¿(heartbeat)À» °öÇØ¼­ ´õÇØÁİ´Ï´Ù.
-    vec4 newPosition = vec4(a_Position, 1.0);
-    newPosition.x = a_Position.x + (x * scale * heartbeat);
-    
-    // ÇÏÆ®°¡ È­¸é ÇÑ°¡¿îµ¥ ¿Àµµ·Ï YÃàÀ¸·Î ¾ÆÁÖ »ìÂ¦(0.1) ¿Ã·ÁÁİ´Ï´Ù.
-    newPosition.y = a_Position.y + (y * scale * heartbeat) + 0.1; 
+    vec4 newPosition;
+	newPosition.x = a_Position.x + cos(t*2*3.14)*0.5;
+    newPosition.y = a_Position.y + sin(t*2*3.14)*0.5;
     newPosition.z = a_Position.z;
+    newPosition.w = 1.0;
 
-    // 6. ¿Ï¼ºµÈ À§Ä¡ Àü´Ş!
-    gl_Position = newPosition;
-	
+	gl_Position = newPosition;
 }
 
-//½ÃÇè¿¡ ³ª¿Ã ¼ö µµ ÀÕÀ½
-void Falling(){
-	float t =mod(u_Time,1.0);
-	float tt = t*t;
-	float vx = a_Vel.x;
-	float vy = a_Vel.y;
-	float initPosX=a_Position.x+cos(vx*c_PI*2);
-	float initPosY=a_Position.y+sin(vy*c_PI*2);
-	vec4 newPos;
-	newPos.x=initPosX;
-	newPos.y=initPosY+ vy*t+ tt*c_G.y*0.5;
-	newPos.z=0;
-	newPos.w=1;
-	gl_Position = newPos;
+void sangsang()
+{
+   float speed = u_Time * 10.0;
+    float progress = mod(speed, 1.0);
 
+    // 1. ï¿½ï¿½ï¿½ï¿½ ï¿½ë°¢ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ -> ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½)
+    vec2 startPos = vec2(-0.8, 0.8);
+    vec2 endPos = vec2(0.8, -0.8);
+    vec2 mainPath = mix(startPos, endPos, progress);
+
+    // 2. ï¿½ë°¢ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    // ï¿½ë°¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (1, -1)ï¿½Ì¹Ç·ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (1, 1)ï¿½ï¿½ ï¿½Ë´Ï´ï¿½.
+    vec2 perpendicularDir = vec2(1.0, 1.0);
+
+    // 3. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½Õºï¿½)
+    float zigzagSpeed = 50.0;
+    float zigzagWidth = 0.3;
+    float offset = sin(speed * zigzagSpeed) * zigzagWidth;
+
+    // 4. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ + ï¿½ï¿½ï¿½ï¿½ ï¿½Õºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    vec4 newPosition;
+    newPosition.xy = mainPath + (perpendicularDir * offset);
+    newPosition.z = a_Position.z;
+    newPosition.w = 1.0;
+
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½âº» ï¿½ï¿½Ä¡(a_Position)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    gl_Position = vec4(newPosition.xy + a_Position.xy, newPosition.z, 1.0);
 }
-void Falling2(){
-float t =mod(u_Time,1.0);
-	float tt = t*t;
-	float vx = a_Vel.x;
-	float vy = a_Vel.y;
-	vec4 newPos;
-	newPos.x=a_Position.x+ vx*t+ tt*c_G.x*0.5;
-	newPos.y=a_Position.y+ vy*t+ tt*c_G.y*0.5;
-	newPos.z=0;
-	newPos.w=1;
-	gl_Position = newPos;
 
-}
+void sangsang2(){
+// ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±ï¿½ ï¿½ï¿½ï¿½ï¿½
+    float speed = u_Time * 10.0;
+    float progress = mod(speed, 1.0);
 
-//½ÃÇè ¸¸¾à initPosX initPosY¸¦ ÁÖ°í ¿ø ÁÖÀ§·Î ³»·Á¿À¶ó°í ÇÒ¶§
-void gravity(){
-	// °¢ ³×¸ğ¸¶´Ù ¼Óµµ°¡ ´Ù¸£¹Ç·Î, ¹Ù´Ú¿¡ ´ê´Â ½Ã°£µµ ´Ù¸£°Ô º¸ÀÌ°Ô ÇÕ´Ï´Ù.
-    // mod¸¦ »ç¿ëÇØ 0~2ÃÊ »çÀÌ¸¦ ¹«ÇÑ ¹İº¹ÇÏ°Ô ¼³Á¤
-    float t = mod(u_Time + a_Vel.x * 10.0, 2.0); 
-	float vx = a_Vel.x;
-	float vy = a_Vel.y;
-    float initPosX=a_Position.x+cos(vx*c_PI*2);
-	float initPosY=a_Position.y+sin(vx*c_PI*2);
-    vec4 newPos;
-    // XÃà: Ã³À½ À§Ä¡ + ¼Óµµ * ½Ã°£
-    newPos.x =initPosX;
-    // YÃà: Ã³À½ À§Ä¡ + ¼Óµµ * ½Ã°£ + (1/2 * Áß·Â * ½Ã°£^2)
-    newPos.y = initPosY + a_Vel.y * t + 0.5 * c_G.y * t * t;
-    newPos.z = 0.0;
-    newPos.w = 1.0;
+    // 1. Xï¿½ï¿½ ï¿½Ìµï¿½: ï¿½ï¿½ï¿½ï¿½(-0.8)ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0.8)ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½
+    float currentX = mix(-0.8, 0.8, progress);
 
-    gl_Position = newPos;
-}
-void Falling3(){
-	float newTime = u_Time-a_Vel.x;
-	
-	if(newTime>0){
-	float t = mod(newTime , 2.0); 
-	float vx = a_Vel.x;
-	float vy = a_Vel.y;
-    float initPosX=a_Position.x+cos(vx*c_PI*2);
-	float initPosY=a_Position.y+sin(vx*c_PI*2);
-    vec4 newPos;
-    // XÃà: Ã³À½ À§Ä¡ + ¼Óµµ * ½Ã°£
-    newPos.x =initPosX;
-    // YÃà: Ã³À½ À§Ä¡ + ¼Óµµ * ½Ã°£ + (1/2 * Áß·Â * ½Ã°£^2)
-    newPos.y = initPosY + a_Vel.y * t + 0.5 * c_G.y * t * t;
-    newPos.z = 0.0;
-    newPos.w = 1.0;
-	gl_Position = newPos;
-	}
-	else{
-	gl_Position=vec4(-100,-100,0,1);
-	}
-
+    // 2. Yï¿½ï¿½ ï¿½Ìµï¿½: ï¿½ß·ï¿½ ï¿½ï¿½ Åºï¿½ï¿½ È¿ï¿½ï¿½
+    // modï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½ Æ¨ï¿½ï¿½ï¿½ ï¿½Ö±â¸¦ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ (ï¿½ï¿½: ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 4ï¿½ï¿½ Æ¨ï¿½ï¿½)
+    float bounceCount = 3.0;
+    float bounceProgress = mod(progress * bounceCount, 1.0);
     
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: y = 4 * height * t * (1 - t) 
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½î¼­ absï¿½ï¿½ È°ï¿½ï¿½ï¿½Ï¸ï¿½ Æ¨ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½É´Ï´ï¿½.
+    float height = 0.6;
+    float bounceY = 4.0 * height * bounceProgress * (1.0 - bounceProgress);
+    
+    // ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½ï¿½ ï¿½Ï°ï¿½ ï¿½î¼± + Æ¨ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ï¿½ï¿½(0.8)ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½(-0.8)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½âº» ï¿½à¿¡ bounceYï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    float baseLineY = mix(0.5, -0.8, progress);
+    float currentY = baseLineY + bounceY;
+
+    vec4 newPosition;
+    newPosition.x = a_Position.x + currentX;
+    newPosition.y = a_Position.y + currentY;
+    newPosition.z = a_Position.z;
+    newPosition.w = 1.0;
+
+    gl_Position = newPosition;
 }
 
 float pseudoRandom(float n){
-	return fract(sin(n)*43758.5453123);
+    return fract(sin(n) * 43758.5453123);
 }
-void Falling4(){
-	float newTime = u_Time-a_Vel.z;
-	float scale = a_Vel.z;
-	if(newTime>0){
-	float t = mod(newTime , 1.0); 
-	float vx = a_Vel.x;
-	float vy = a_Vel.y;
-    float initPosX=a_Position.x*a_Vel.z+cos(vx*c_PI*2);
-	float initPosY=a_Position.y*a_Vel.z+sin(vx*c_PI*2);
-    vec4 newPos;
-    // XÃà: Ã³À½ À§Ä¡ + ¼Óµµ * ½Ã°£
-    newPos.x =initPosX;
-    // YÃà: Ã³À½ À§Ä¡ + ¼Óµµ * ½Ã°£ + (1/2 * Áß·Â * ½Ã°£^2)
-    newPos.y = initPosY + 0.5 * c_G.y * t * t;
-    newPos.z = 0.0;
-    newPos.w = 1.0;
-	gl_Position = newPos;
-	}
-	else{
-	gl_Position=vec4(-100,-100,0,1);
-	}
 
+//void falling()
+//{
+//    float newTime = u_Time - a_RV1;
+//    if(newTime > 0){
+//        float t =  mod(newTime, 1.0);
+//        float tt = t*t;
+//        float vx = a_Vel.x;
+//        float vy = a_Vel.y;
+//        float initPosX = a_Position.x + cos(a_RV * c_PI) * 0.7;
+//        float initPosY = a_Position.y + sin(a_RV * c_PI) * 0.7;
+//
+//        vec4 newPos;
+//        newPos.x = initPosX + vx * t + 0.5 * c_G.x * tt;
+//        newPos.y = initPosY + vy * t + 0.5 * c_G.y * tt;
+//        newPos.z = 0;
+//        newPos.w = 1;
+//
+//        gl_Position = newPos;
+//    }
+//    else {
+//        gl_Position = vec4(-2.0, -2.0, 0.0, 1.0); // È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+//    }
+//}
+
+void falling()
+{
+    float newTime = u_Time - a_RV1*3; 
+    if(newTime > 0){ 
+        float lifeTime = a_RV2 + 0.5;
+        //float scale = pseudoRandom(a_RV1);
+        float t = mod(newTime, lifeTime)/lifeTime; 
+        float tt = t * t; 
+        float scale = lifeTime - t;
+        
+        float initPosX = a_Position.x * scale + cos(a_RV * c_PI) * 0.7; 
+        float initPosY = a_Position.y * scale + sin(a_RV * c_PI) * 0.7; 
+
+        vec4 newPos;
+        //newPos.x = initPosX + a_Vel.x * t + 0.5 * c_G.x * tt; 
+        newPos.x = initPosX; 
+        newPos.y = initPosY + a_Vel.y * t + 0.5 * c_G.y * tt; 
+        newPos.z = 0;
+        newPos.w = 1;
+        gl_Position = newPos; 
+    }
+    else {
+        gl_Position = vec4(-2.0, -2.0, 0.0, 1.0);
+    }
+}
+
+void Thrust()
+{
+    float newTime = u_Time - a_RV1;
+    if(newTime >0){
+        float t = mod(newTime, 1.0);
+        float ampScale = 0.5-t*0.5;
+        float amp = (a_RV-0.5)*2;
+        float period = pseudoRandom(a_RV2);
+        float sizeScale = t*2;
+
+	    vec4 newPosition;
+	    newPosition.x = a_Position.x * sizeScale - 1 + 2 * t;
+        newPosition.y = a_Position.y * sizeScale + amp * ampScale * sin(t*2*period*c_PI);
+        newPosition.z = a_Position.z;
+        newPosition.w = 1.0;
+        gl_Position = newPosition;
+        v_Grey = 1-t;
+    }
+    else{
+        gl_Position = vec4(10000);
+    }
+}
+void space()
+// ìš°ì£¼ìµœê°• ì–‘í˜„ë¹ˆ ì „ìš© ë¹…ë±… ë§ˆë²•! (ìƒˆ ë³€ìˆ˜ ì¶”ê°€ ì ˆëŒ€ ì—†ìŒ)
+
+{
+    // 1. ê¸°ì¡´ ë³€ìˆ˜ u_Timeê³¼ ëœë¤ ë³€ìˆ˜ a_RVë¥¼ ì¬í™œìš©í•´ íŒŒí‹°í´ë§ˆë‹¤ ë‹¤ë¥¸ í­ë°œ íƒ€ì´ë° ìƒì„±
+    float t = mod(u_Time * 0.5 + a_RV, 2.0); 
     
-}
-void GalaxySupernova() {
-    // 1. ¿ìÁÖÀÇ ½Ã°£ (ºò¹ğ°ú ºí·¢È¦ Èí¼ö¸¦ ¹İº¹ÇÏ´Â ÁÖ±â)
-    // 0~2.0 »çÀÌ¸¦ ¹İº¹ÇÏ¸ç, Æø¹ß°ú ¼öÃàÀÇ ±âÁØÀÌ µË´Ï´Ù.
-    float t = mod(u_Time * 0.3, 2.0); 
+    // 2. c_PIë¥¼ ì´ìš©í•´ 0ì—ì„œ ì»¤ì¡Œë‹¤ê°€ ë‹¤ì‹œ 0ìœ¼ë¡œ ì¤„ì–´ë“œëŠ” íŒ½ì°½ íš¨ê³¼ (ë¹…ë±…)
+    float expansion = sin(t * c_PI); 
 
-    // 2. ÆÄÆ¼Å¬ °íÀ¯ÀÇ À§Ä¡ ¼¼ÆÃ (a_VelÀ» È°¿ëÇÑ ·£´ı ºĞÆ÷)
-    // a_Vel.x (-1.0 ~ 1.0)¸¦ ÀÌ¿ëÇØ 360µµ(4ÆÄÀÌ) ¹«ÀÛÀ§ °¢µµ ¹èÁ¤
-    float angle = a_Vel.x * c_PI * 4.0; 
+    // 3. ê¸°ì¡´ ëœë¤ ë³€ìˆ˜ a_RV1ê³¼ a_RV2ë¥¼ 'ê°ë„'ì™€ 'ë°˜ì§€ë¦„'ìœ¼ë¡œ ì·¨ê¸‰í•˜ëŠ” ë§ˆë²•! 
+    // ì•ˆìª½ì— ìˆì„ìˆ˜ë¡(a_RV2ê°€ ì‘ì„ìˆ˜ë¡) ë¹›ì˜ ì†ë„ë¡œ ë¯¸ì¹œ ë“¯ì´ íšŒì „í•©ë‹ˆë‹¤.
+    float angle = a_RV1 * c_PI * 10.0 + u_Time * (3.0 / (a_RV2 + 0.1));
+    float radius = a_RV2 * 1.5 * expansion;
+
+    // 4. ê¸°ì¡´ a_Positionì„ ë³€í˜•ì‹œì¼œ ìš°ì£¼ ì†Œìš©ëŒì´ ìœ„ì¹˜ ì§€ì • [cite: 3]
+    vec4 newPosition = vec4(a_Position, 1.0);
+    newPosition.x = (a_Position.x * expansion) + cos(angle) * radius;
+    newPosition.y = (a_Position.y * expansion) + sin(angle) * radius;
+    newPosition.z = a_Position.z;
     
-    // a_Vel.z (0.0 ~ 1.0)¸¦ ÀÌ¿ëÇØ Áß½ÉÀ¸·ÎºÎÅÍÀÇ ¹«ÀÛÀ§ °Å¸® ¹èÁ¤
-    float radius = a_Vel.z * 1.8;       
+    gl_Position = newPosition;
 
-    // 3. ¼Ò¿ëµ¹ÀÌ ¸¶¹ı (¾ÈÂÊ¿¡ ÀÖ´Â º°ÀÏ¼ö·Ï ´õ »¡¸® µ½´Ï´Ù!)
-    // °Å¸®°¡ °¡±î¿ï¼ö·Ï È¸Àü ¼Óµµ°¡ ±âÇÏ±Ş¼öÀûÀ¸·Î »¡¶óÁı´Ï´Ù.
-    float swirl = angle + u_Time * (2.0 / (radius + 0.2));
+    // 5. í•µì‹¬ íŠ¸ë¦­: ê¸°ì¡´ íšŒìƒ‰ì¡° ë³€ìˆ˜ v_Greyì— 'íŒ½ì°½ë„(0~1)'ë¥¼ ë‹´ì•„ì„œ ëª°ë˜ ë„˜ê¹ë‹ˆë‹¤! ]
+    v_Grey = expansion;
 
-    // 4. ºò¹ğ°ú ºí·¢È¦ ¸¶¹ı (sin ÇÔ¼ö·Î ºÎµå·¯¿î ÆØÃ¢°ú ¼öÃà)
-    // t°¡ 1.0ÀÏ ¶§ °¡Àå Å©°Ô ÆØÃ¢ÇÏ°í, 0.0ÀÌ³ª 2.0ÀÏ ¶§ ÇÑ Á¡À¸·Î ¸ğÀÔ´Ï´Ù.
-    float expansion = sin(t * c_PI);
-
-    // 5. ÃÖÁ¾ À§Ä¡ °è»ê (¿ø¿îµ¿ °ø½Ä Àû¿ë)
-    // a_Vel.y¸¦ °öÇØÁà¼­ º°µé¸¶´Ù ÆÛÁ®³ª°¡´Â ±Ëµµ Å©±â¸¦ ´Ù¸£°Ô ¸¸µì´Ï´Ù.
-    float currentRadius = radius * expansion * (a_Vel.y + 0.5);
-    float posX = cos(swirl) * currentRadius;
-    float posY = sin(swirl) * currentRadius;
-
-    // 6. ³×¸ğ Å©±â Á¶Àı (¸Ö¸® ³¯¾Æ°¥¼ö·Ï, ÆØÃ¢ÇÒ¼ö·Ï Å©±â°¡ Ä¿Áı´Ï´Ù)
-    float scale = a_Vel.z * expansion * 0.8;
-
-    vec4 newPos;
-    // a_Position¿¡ ½ºÄÉÀÏÀ» °öÇØ ³×¸ğ Å©±â¸¦ Á¤ÇÏ°í, ¼Ò¿ëµ¹ÀÌ À§Ä¡¸¦ ´õÇÕ´Ï´Ù.
-    newPos.x = (a_Position.x * scale) + posX;
-    newPos.y = (a_Position.y * scale) + posY;
-    newPos.z = 0.0;
-    newPos.w = 1.0;
-
-    gl_Position = newPos;
 }
-void main(){
-	GalaxySupernova();
-
+void main()
+{
+	space();
 }

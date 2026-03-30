@@ -1,8 +1,10 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
+#include <iostream>   
+#include <vector>
 #include "Renderer.h"
-#define §∑§µ§∑ 1000
-default_random_engine dre;
-uniform_real_distribution<float>urd{ 0.0,1.0 };
+
+#define nemoCnt 1000
+
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
 	Initialize(windowSizeX, windowSizeY);
@@ -21,9 +23,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-	//Load shaders
 	m_TriangleShader = CompileShaders("./Shaders/triangle.vs", "./Shaders/triangle.fs");
-	
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -38,80 +39,67 @@ bool Renderer::IsInitialized()
 	return m_Initialized;
 }
 
-//void Renderer::CreateVertexBufferObjects()
-//{
-//	float rect[]
-//		=
-//	{
-//		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, -1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
-//		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,  1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
-//	};
-//
-//	glGenBuffers(1, &m_VBORect);
-//	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
-//
-//	float centerX = 0;
-//	float centerY = 0;
-//	float vx = 1;
-//	float vy = 1;
-//	float size = 0.1;
-//	float mass = 1;
-//	float triangle[]
-//		=
-//	{
-//		centerX - size/2,centerY - size / 2,0,
-//		mass,vx,vy,//v0
-//		centerX + size / 2,centerY - size / 2,0,
-//		mass,vx,vy,//v1
-//		centerX + size / 2,centerY + size / 2,0,
-//		mass,vx,vy,//v2
-//
-//		centerX - size / 2,centerY - size / 2,0,
-//		mass,vx,vy,
-//		centerX + size / 2,centerY + size / 2,0,
-//		mass,vx,vy,
-//		centerX - size / 2,centerY + size / 2,0,
-//		mass,vx,vy
-//	};
-//	glGenBuffers(1, &m_TriangleVBO);
-//	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
-//	glBufferData(GL_ARRAY_BUFFER,sizeof(triangle),triangle,GL_STATIC_DRAW);//µ•¿Ã≈Õ ø√∏Æ¥¬∞« ¥Î∫Œ∫– µø±‚»≠∞° µ«æﬂµ  ∫∏≈Î¿∫ µø±‚
-//}
-float velocities[§∑§µ§∑ * 3]; // 100∏Ì∫–¿« (xº”µµ, yº”µµ)
-void Renderer::CreateVertexBufferObjects() {
-	// 1. ≥◊∏ ∏æÁ µ•¿Ã≈Õ (±‚¡∏∞˙ µø¿œ)
-
-	float rect[] = {
-		-0.05f, -0.05f, 0.0f,  0.05f, -0.05f, 0.0f,  0.05f,  0.05f, 0.0f,
-		-0.05f, -0.05f, 0.0f,  0.05f,  0.05f, 0.0f, -0.05f,  0.05f, 0.0f
+void Renderer::CreateVertexBufferObjects()
+{
+	float rect[]
+		=
+	{
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, -1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,  1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
 	};
+
 	glGenBuffers(1, &m_VBORect);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW); 
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 
-		// 2. 100∞≥¿« ∑£¥˝ º”µµ µ•¿Ã≈Õ ∏∏µÈ±‚
-	for (int i = 0; i < §∑§µ§∑; i++) {
-		velocities[i * 3] = ((rand() % 200) - 100) / 100.0f; // Xº”µµ: -1.0 ~ 1.0 ∑£¥˝
-		velocities[i * 3 + 1] = (rand() % 100) / 50.0f;       // Yº”µµ: 0.0 ~ 2.0 ∑£¥˝
-		velocities[i * 3 + 2] = urd(dre);       // Yº”µµ: 0.0 ~ 2.0 ∑£¥˝
-	}
-	for (int i = 0; i < 25; i++) {
-		float a = urd(dre);
-		/*velocities[i * 3 + 2] = a;
-		velocities[i * 3 + 5] = a;
-		velocities[i * 3 + 8] = a;
-		velocities[i * 3 + 11] = a;*/
+	static bool seeded = false;
+	if (!seeded) { srand((unsigned int)time(NULL)); seeded = true; }
+
+	const int particleCount = nemoCnt; // ÔøΩÔøΩ∆º≈¨ ÔøΩÔøΩÔøΩÔøΩ
+	std::vector<float> vertices;
+
+	float size = 0.01;
+	float halfSize{ size / 2 };
+
+	for (int i = 0; i < particleCount; ++i)
+	{
+		float centerX = 0;
+		float centerY = 0;
+		float vx = ((rand() % 100) - 100) / 100.0f;
+		//float vy = (rand() % 200) / 100.0f;
+		float vy = 0;
+		float mass = 1;
+		float RV = (rand() % 100) / 100.0f;
+		float RV1 = (rand() % 100) / 100.0f;
+		float RV2 = (rand() % 100) / 100.0f;
+		float triangle[]
+			=
+		{
+			centerX - halfSize, centerY - halfSize, 0,
+			mass, vx, vy, RV, RV1, RV2,
+			centerX + halfSize, centerY - halfSize, 0,
+			mass, vx, vy, RV, RV1, RV2,
+			centerX + halfSize, centerY + halfSize, 0,
+			mass, vx, vy, RV, RV1, RV2,
+
+			centerX - halfSize, centerY - halfSize, 0,
+			mass, vx, vy, RV, RV1, RV2,
+			centerX - halfSize, centerY + halfSize, 0,
+			mass, vx, vy, RV, RV1, RV2,
+			centerX + halfSize, centerY + halfSize, 0,
+			mass, vx, vy, RV, RV1, RV2
+		};
+		vertices.insert(vertices.end(), std::begin(triangle), std::end(triangle));
 	}
 
-	glGenBuffers(1, &m_VelVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VelVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(velocities), velocities, GL_STATIC_DRAW);
+	glGenBuffers(1, &m_TriangleVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
-	//Ω¶¿Ã¥ı ø¿∫Í¡ß∆Æ ª˝º∫
+	//ÔøΩÔøΩÔøΩÃ¥ÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ∆Æ ÔøΩÔøΩÔøΩÔøΩ
 	GLuint ShaderObj = glCreateShader(ShaderType);
 
 	if (ShaderObj == 0) {
@@ -122,29 +110,29 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	p[0] = pShaderText;
 	GLint Lengths[1];
 	Lengths[0] = strlen(pShaderText);
-	//Ω¶¿Ã¥ı ƒ⁄µÂ∏¶ Ω¶¿Ã¥ı ø¿∫Í¡ß∆Æø° «“¥Á
+	//ÔøΩÔøΩÔøΩÃ¥ÔøΩ ÔøΩ⁄µÂ∏¶ ÔøΩÔøΩÔøΩÃ¥ÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ∆ÆÔøΩÔøΩ ÔøΩ“¥ÔøΩ
 	glShaderSource(ShaderObj, 1, p, Lengths);
 
-	//«“¥Áµ» Ω¶¿Ã¥ı ƒ⁄µÂ∏¶ ƒƒ∆ƒ¿œ
+	//ÔøΩ“¥ÔøΩÔøΩ ÔøΩÔøΩÔøΩÃ¥ÔøΩ ÔøΩ⁄µÂ∏¶ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
 	glCompileShader(ShaderObj);
 
 	GLint success;
-	// ShaderObj ∞° º∫∞¯¿˚¿∏∑Œ ƒƒ∆ƒ¿œ µ«æ˙¥¬¡ˆ »Æ¿Œ
+	// ShaderObj ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩ«æÔøΩÔøΩÔøΩÔøΩÔøΩ »ÆÔøΩÔøΩ
 	glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		GLchar InfoLog[1024];
 
-		//OpenGL ¿« shader log µ•¿Ã≈Õ∏¶ ∞°¡Æø»
+		//OpenGL ÔøΩÔøΩ shader log ÔøΩÔøΩÔøΩÔøΩÔøΩÕ∏ÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
 		glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
 		fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
 		printf("%s \n", pShaderText);
 	}
 
-	// ShaderProgram ø° attach!!
+	// ShaderProgram ÔøΩÔøΩ attach!!
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-bool Renderer::ReadFile(char* filename, std::string *target)
+bool Renderer::ReadFile(char* filename, std::string* target)
 {
 	std::ifstream file(filename);
 	if (file.fail())
@@ -163,43 +151,43 @@ bool Renderer::ReadFile(char* filename, std::string *target)
 
 GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 {
-	GLuint ShaderProgram = glCreateProgram(); //∫Û Ω¶¿Ã¥ı «¡∑Œ±◊∑• ª˝º∫
+	GLuint ShaderProgram = glCreateProgram(); //ÔøΩÔøΩ ÔøΩÔøΩÔøΩÃ¥ÔøΩ ÔøΩÔøΩÔøΩŒ±◊∑ÔøΩ ÔøΩÔøΩÔøΩÔøΩ
 
-	if (ShaderProgram == 0) { //Ω¶¿Ã¥ı «¡∑Œ±◊∑•¿Ã ∏∏µÈæÓ¡≥¥¬¡ˆ »Æ¿Œ
+	if (ShaderProgram == 0) { //ÔøΩÔøΩÔøΩÃ¥ÔøΩ ÔøΩÔøΩÔøΩŒ±◊∑ÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ »ÆÔøΩÔøΩ
 		fprintf(stderr, "Error creating shader program\n");
 	}
 
 	std::string vs, fs;
 
-	//shader.vs ∞° vs æ»¿∏∑Œ ∑Œµ˘µ 
+	//shader.vs ÔøΩÔøΩ vs ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩŒµÔøΩÔøΩÔøΩ
 	if (!ReadFile(filenameVS, &vs)) {
 		printf("Error compiling vertex shader\n");
 		return -1;
 	};
 
-	//shader.fs ∞° fs æ»¿∏∑Œ ∑Œµ˘µ 
+	//shader.fs ÔøΩÔøΩ fs ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩŒµÔøΩÔøΩÔøΩ
 	if (!ReadFile(filenameFS, &fs)) {
 		printf("Error compiling fragment shader\n");
 		return -1;
 	};
 
-	// ShaderProgram ø° vs.c_str() πˆ≈ÿΩ∫ Ω¶¿Ã¥ı∏¶ ƒƒ∆ƒ¿œ«— ∞·∞˙∏¶ attach«‘
+	// ShaderProgram ÔøΩÔøΩ vs.c_str() ÔøΩÔøΩÔøΩÿΩÔøΩ ÔøΩÔøΩÔøΩÃ¥ÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩ attachÔøΩÔøΩ
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
-	// ShaderProgram ø° fs.c_str() «¡∑π±◊∏’∆Æ Ω¶¿Ã¥ı∏¶ ƒƒ∆ƒ¿œ«— ∞·∞˙∏¶ attach«‘
+	// ShaderProgram ÔøΩÔøΩ fs.c_str() ÔøΩÔøΩÔøΩÔøΩÔøΩ◊∏ÔøΩ∆Æ ÔøΩÔøΩÔøΩÃ¥ÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩ attachÔøΩÔøΩ
 	AddShader(ShaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
 	GLint Success = 0;
 	GLchar ErrorLog[1024] = { 0 };
 
-	//Attach øœ∑·µ» shaderProgram ¿ª ∏µ≈∑«‘
+	//Attach ÔøΩœ∑ÔøΩÔøΩ shaderProgram ÔøΩÔøΩ ÔøΩÔøΩ≈∑ÔøΩÔøΩ
 	glLinkProgram(ShaderProgram);
 
-	//∏µ≈©∞° º∫∞¯«ﬂ¥¬¡ˆ »Æ¿Œ
+	//ÔøΩÔøΩ≈©ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩﬂ¥ÔøΩÔøΩÔøΩ »ÆÔøΩÔøΩ
 	glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
 
 	if (Success == 0) {
-		// shader program ∑Œ±◊∏¶ πﬁæ∆ø»
+		// shader program ÔøΩŒ±◊∏ÔøΩ ÔøΩﬁæ∆øÔøΩ
 		glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
 		std::cout << filenameVS << ", " << filenameFS << " Error linking shader program\n" << ErrorLog;
 		return -1;
@@ -214,72 +202,109 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	}
 
 	glUseProgram(ShaderProgram);
-	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.";
+	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done." << std::endl;
 
 	return ShaderProgram;
 }
+
+void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
+{
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	//Program select
+	glUseProgram(m_SolidRectShader);
+
+	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), newX, newY, 0, size);
+	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), r, g, b, a);
+
+	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 float gTime = 0;
+
 //void Renderer::DrawTriangle()
 //{
+//	gTime += 0.0001;
+//	int attribCnt = 8; // x, y, z, mass, vx, vy, RV, RV1
 //
-//	gTime += 0.01f;
 //	//Program select
 //	glUseProgram(m_TriangleShader);
 //
-//	int uTime = glGetUniformLocation(m_TriangleShader,
-//		"u_Time");
+//	int uTime = glGetUniformLocation(m_TriangleShader, "u_Time");
 //	glUniform1f(uTime, gTime);
 //
 //	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Position");
 //	int attribMass = glGetAttribLocation(m_TriangleShader, "a_Mass");
 //	int attribVel = glGetAttribLocation(m_TriangleShader, "a_Vel");
+//	int attribRVel = glGetAttribLocation(m_TriangleShader, "a_RV");
+//	int attribRVel_1 = glGetAttribLocation(m_TriangleShader, "a_RV1");
 //
 //	glEnableVertexAttribArray(attribPosition);
 //	glEnableVertexAttribArray(attribMass);
 //	glEnableVertexAttribArray(attribVel);
-//	
-//	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
-//	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);//µ⁄ø° µŒ¿⁄∏Æ¡ﬂ øﬁ¬ ∞Õ¿∫ Ω∫∆Æ∂Û¿ÃµÂ¿”
+//	glEnableVertexAttribArray(attribRVel);
+//	glEnableVertexAttribArray(attribRVel_1);
 //
 //	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
-//	glVertexAttribPointer(attribMass, 1, GL_FLOAT, GL_FALSE, 6*sizeof(float), (GLvoid*)(sizeof(float)*3));//µ⁄ø° µŒ¿⁄∏Æ¡ﬂ øﬁ¬ ∞Õ¿∫ Ω∫∆Æ∂Û¿ÃµÂ¿”
-//	//4∞≥æø ≥—æÓ∞°æﬂ ªı∑ŒøÓ∞‘ ≥™ø¿π«∑Œ 4*sizeof(float)∏¶«‘
-//	//µŒπ¯¬∞¥¬ ∏Ó∞≥æø ¿–¿ª¡ˆ
+//	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, attribCnt * sizeof(float), 0);
+//
 //	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
-//	glVertexAttribPointer(attribVel, 2, GL_FLOAT, GL_FALSE,6 * sizeof(float), (GLvoid*)(sizeof(float) * 4));
+//	glVertexAttribPointer(attribMass, 1, GL_FLOAT, GL_FALSE, attribCnt * sizeof(float), (GLvoid*)(sizeof(float) * 3));
 //
-//	glDrawArrays(GL_TRIANGLES, 0, 6);
+//	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+//	glVertexAttribPointer(attribVel, 2, GL_FLOAT, GL_FALSE, attribCnt * sizeof(float), (GLvoid*)(sizeof(float) * 4));
 //
+//	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+//	glVertexAttribPointer(attribRVel, 1, GL_FLOAT, GL_FALSE, attribCnt * sizeof(float), (GLvoid*)(sizeof(float) * 6));
+//
+//	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+//	glVertexAttribPointer(attribRVel_1, 1, GL_FLOAT, GL_FALSE, attribCnt * sizeof(float), (GLvoid*)(sizeof(float) * 7));
+//
+//	glDrawArrays(GL_TRIANGLES, 0, 6 * nemoCnt);
 //}
-void Renderer::DrawTriangle() {
-	gTime += 0.03f;
-	//Program select
-	glUseProgram(m_TriangleShader);// 2. ∑£¥˝ º”µµ ø¨∞· (a_Vel)
-	int uTime = glGetUniformLocation(m_TriangleShader,"u_Time");
-	glUniform1f(uTime, gTime);
 
-	
+void Renderer::DrawTriangle()
+{
+	gTime += 0.01; // ÔøΩÔøΩÔøΩÔøΩ ÔøΩ”µÔøΩÔøΩÔøΩ ÔøΩ¬∞ÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩ øÔøΩ
+	int stride = 9 * sizeof(float); // vec4(4) + vec4(4) = 8
 
-		// 1. ∏æÁ ø¨∞· (a_Position)
-		int posLoc = glGetAttribLocation(m_TriangleShader, "a_Position");
-	glEnableVertexAttribArray(posLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glUseProgram(m_TriangleShader);
+	glUniform1f(glGetUniformLocation(m_TriangleShader, "u_Time"), gTime);
 
-	// 2. ∑£¥˝ º”µµ ø¨∞· (a_Vel)
-	int velLoc = glGetAttribLocation(m_TriangleShader, "a_Vel");
-	glEnableVertexAttribArray(velLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VelVBO);
-	glVertexAttribPointer(velLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	// 1. a_PosMass (Location 0) ÔøΩÔøΩÔøΩÔøΩ
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, stride, (GLvoid*)0);
 
-	// ¿Ã «‘ºˆ∞° «ŸΩ…! "º”µµ µ•¿Ã≈Õ¥¬ ≥◊∏ 1∞≥(¿ŒΩ∫≈œΩ∫)∏∂¥Ÿ ¥Ÿ¿Ω ƒ≠¿∏∑Œ ≥—æÓ∞°∂Û"¥¬ ∂Ê¿‘¥œ¥Ÿ.
-	glVertexAttribDivisor(velLoc, 1);
+	// 2. a_VelRV (Location 1) ÔøΩÔøΩÔøΩÔøΩ
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(float) * 4));
 
-	// 3. 100∞≥ ±◊∏Æ±‚ ∏Ì∑…
-	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, §∑§µ§∑);
+	int attribRVel_2 = glGetAttribLocation(m_TriangleShader, "a_RV2");
+	glEnableVertexAttribArray(attribRVel_2);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
+	glVertexAttribPointer(attribRVel_2, 1, GL_FLOAT, GL_FALSE, stride, (GLvoid*)(sizeof(float) * 8));
+
+	// ÔøΩ◊∏ÔøΩÔøΩÔøΩ
+	glDrawArrays(GL_TRIANGLES, 0, 6 * nemoCnt);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 }
 
-void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
+void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 {
 	*newX = x * 2.f / m_WindowSizeX;
 	*newY = y * 2.f / m_WindowSizeY;
