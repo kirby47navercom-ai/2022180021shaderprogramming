@@ -38,4 +38,6 @@ private:
 
 	GLuint m_TriangleVBO = 0;
 	GLuint m_TriangleShader = 0;
+
+	float m_Raininfo[500*4];
 };

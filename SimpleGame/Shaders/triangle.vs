@@ -155,7 +155,7 @@ float pseudoRandom(float n){
 
 void falling()
 {
-    float newTime = u_Time - a_RV1*3; 
+    float newTime = u_Time - a_RV1*5; 
     if(newTime > 0){ 
         float lifeTime = a_RV2 + 0.5;
         //float scale = pseudoRandom(a_RV1);
@@ -228,7 +228,53 @@ void space()
     v_Grey = expansion;
 
 }
+void test(){
+    /*
+    float vy =a_Vel.x;
+   float t = mod(u_Time,1.0);
+   //float t = clamp(u_Time,0.0,2.0);
+   //float realtime = fract(u_Time);
+    vec4 newPosition;
+    //newPosition.x = a_Position.x-1.0f+t;
+    newPosition.x = a_Position.x+cos(a_RV*2.0f*c_PI);
+    //newPosition.y = a_Position.y;
+    newPosition.y = a_Position.y+sin(a_RV*2.0f*c_PI)+vy*t+c_G.y*t*t/2;
+    newPosition.z = a_Position.z;
+    */
+    float randtime= u_Time-a_RV2;
+    if(randtime>0){
+        /*
+         float realtime = a_RV1+1.0;
+        float t = mod(randtime,realtime)/realtime;
+        float size = realtime-t;
+        float vy =a_Vel.x;
+         vec4 newPosition;
+        newPosition.x = a_Position.x*size+cos(a_RV*c_PI)*0.7;
+        newPosition.y = a_Position.y*size+sin(a_RV*c_PI)*0.7+vy*t+c_G.y*t*t/2;
+        newPosition.z = a_Position.z;*/
+
+        float t = mod(randtime,1.0);
+   
+
+
+         vec4 newPosition;
+        newPosition.x = a_Position.x*t*2- 1 + 2 * t;
+        newPosition.y = a_Position.y*t*2+sin(a_RV*c_PI*2*t)*(1*0.5-t*0.5)*((pseudoRandom(a_RV1) - 0.5) * 2);
+        newPosition.z = a_Position.z;
+        
+        gl_Position = newPosition;
+        v_Grey = 1-t;
+    }
+    else{
+         gl_Position = vec4(-2,-2,0,1);
+    }
+
+
+   
+}
 void main()
 {
-	space();
+	test();
+    //falling();
+    //Thrust();
 }

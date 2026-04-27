@@ -3,7 +3,7 @@
 #include <vector>
 #include "Renderer.h"
 
-#define nemoCnt 1000
+#define nemoCnt 10000
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -28,6 +28,18 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Create VBOs
 	CreateVertexBufferObjects();
+
+	int index = 0;
+	for (int i = 0; i < 500; ++i) {
+		float x = (float)rand() / (float)RAND_MAX;
+		float y = (float)rand() / (float)RAND_MAX;
+		float sTime = 5.f* (float)rand() / (float)RAND_MAX;
+		float lTime = 0.5f * (float)rand() / (float)RAND_MAX;
+		m_Raininfo[index]=x; index++;
+		m_Raininfo[index]=y; index++;
+		m_Raininfo[index]=sTime; index++;
+		m_Raininfo[index]=lTime; index++;
+	}
 
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
 	{
@@ -72,6 +84,7 @@ void Renderer::CreateVertexBufferObjects()
 	if (!seeded) { srand((unsigned int)time(NULL)); seeded = true; }
 
 	const int particleCount = nemoCnt; // ��ƼŬ ����
+	//const int particleCount = 1;
 	std::vector<float> vertices;
 
 	float size = 0.01;
@@ -85,7 +98,7 @@ void Renderer::CreateVertexBufferObjects()
 		//float vy = (rand() % 200) / 100.0f;
 		float vy = 0;
 		float mass = 1;
-		float RV = (rand() % 100) / 100.0f;
+		float RV = (rand() % 1000) / 1000.0f;
 		float RV1 = (rand() % 100) / 100.0f;
 		float RV2 = (rand() % 100) / 100.0f;
 		float triangle[]
@@ -245,6 +258,7 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glDisableVertexAttribArray(attribPosition);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 }
 
 float gTime = 0;
@@ -327,6 +341,9 @@ void Renderer::DrawFS()
 	GLuint shader = FS_Shader;
 	glUseProgram(shader);
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), gTime);
+
+	int uPoints = glGetUniformLocation(shader, "u_Points");
+	glUniform4fv(uPoints,500,m_Raininfo);
 
 	int attribPosition = glGetAttribLocation(shader, "a_Pos");
 	int attribTexture = glGetAttribLocation(shader, "a_Tex");
